@@ -14,6 +14,53 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   @override
+  void initState() {
+    AwesomeNotifications().requestPermissionToSendNotifications().then(
+      (isAllowed) {
+        if (isAllowed) {
+          // escuchar por notificaciones con puro texto
+          AwesomeNotifications().displayedStream.listen(
+            (notificationMsg) {
+              print(notificationMsg);
+            },
+          );
+
+          // escuchar por notificaciones con botones/acciones
+          AwesomeNotifications().actionStream.listen(
+            (notificationAction) {
+              if (!StringUtils.isNullOrEmpty(
+                  notificationAction.buttonKeyInput)) {
+                // respuesta de un mensaje input de texto
+                print(notificationAction);
+              } else {
+                // abrir pantalla.
+                // logica para hacer algo cuando presienen el boton
+                processDefaultActionRecieved(notificationAction);
+              }
+            },
+          );
+        }
+      },
+    );
+
+    // inicializar FCM
+    // indicar que muestre notificacionse cuando reciba el mensaje
+
+    super.initState();
+  }
+
+  void processDefaultActionRecieved(ReceivedAction action) {
+    print("Accion recibida >>>>>> $action");
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (contex) => Books(
+          datos: action.title,
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -35,12 +82,13 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             flex: 2,
             child: NotifMenu(
-              notifSimple: () => {},
-              notifConIcono: () => {},
-              notifConImagen: () => {},
-              notifConAccion: () => {},
-              notifAgendada: () => {},
-              cancelNotifAgendada: () => {},
+              notifSimple: () => showBasicNotification(123),
+              notifConIcono: () => showLargeIconNotification(321),
+              notifConImagen: () => showBigPictureAndLargeIconNotification(710),
+              notifConAccion: () =>
+                  showBigPictureAndActionButtonsAndReplay(789),
+              notifAgendada: () => repeatMinuteNotification(159),
+              cancelNotifAgendada: () => cancelAllSchedules(),
             ),
           ),
         ],
