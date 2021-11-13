@@ -2,6 +2,8 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:push_notifs_o2021/books.dart';
 import 'package:push_notifs_o2021/utils/notification_util.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:push_notifs_o2021/utils/constants_utils.dart';
 
 import 'notif_menu.dart';
 
@@ -42,9 +44,25 @@ class _HomePageState extends State<HomePage> {
         }
       },
     );
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
 
     // inicializar FCM
     // indicar que muestre notificacionse cuando reciba el mensaje
+    //Inicializar firebase cloud listening.onmessage.listen
+    // Reciba el mensaje -> Pinte la notificacion
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: 0,
+          channelKey: channelSimpleId,
+          title: message.notification!.title,
+          body: message.notification!.body,
+        ),
+      );
+    });
+
+    Future<String?> token = FirebaseMessaging.instance.getToken();
+    print(token);
 
     super.initState();
   }

@@ -1,12 +1,43 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:push_notifs_o2021/home/home_page.dart';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'utils/constants_utils.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  AwesomeNotifications().initialize('resource://drawable/res_app_icon', [
+    // Your notification channels go here
+    NotificationChannel(
+      channelKey: channelBigPictureId,
+      channelName: channelBigPictureName,
+      channelDescription: channelBigPictureDescr,
+      defaultColor: Colors.purple,
+      ledColor: Colors.yellow,
+      importance: NotificationImportance.High,
+    ),
+  ]);
+
+  // Create the initialization for your desired push service here
+  FirebaseApp firebaseApp = await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   await initLocalNotifications();
   runApp(MyApp());
+}
+
+// Declared as global, outside of any class
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+  await Firebase.initializeApp();
+
+  print("Handling a background message: ${message.messageId}");
+
+  // Use this method to automatically convert the push data, in case you gonna use our data standard
+  AwesomeNotifications().createNotificationFromJsonData(message.data);
 }
 
 Future initLocalNotifications() async {
