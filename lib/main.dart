@@ -10,7 +10,6 @@ void main() async {
 }
 
 Future initLocalNotifications() async {
-  // TODO: inicializar los canales
   await AwesomeNotifications().initialize(
     null,
     [
